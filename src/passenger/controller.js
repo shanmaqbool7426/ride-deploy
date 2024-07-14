@@ -14,7 +14,7 @@ class PassengerController {
       if (existingPassenger) {
         return sendErrorResponse(res, BAD_REQUEST, 'Passenger already exists');
       }
-      const hashedPassword = await bcrypt.hash(password, parseInt(process.env.HASH_SALT_ROUNDS, 10));
+      const hashedPassword = await bcrypt.hash(password, parseInt(10, 10));
       const passengerData = {
         ...req.body,
         password: hashedPassword
@@ -54,7 +54,7 @@ class PassengerController {
         return sendErrorResponse(res, BAD_REQUEST, 'Invalid credentials');
       }
 
-      const token = jwt.sign({ id: passenger._id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: passenger._id }, 'myverysecuresecret');
 
       return sendSuccessResponse(res, OK, 'Login successful', {data: passenger, token });
     } catch (error) {

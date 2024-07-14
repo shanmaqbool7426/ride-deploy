@@ -16,7 +16,7 @@ class UserController {
         return sendErrorResponse(res, BAD_REQUEST, `${role} already exists`);
       }
 
-      const hashedPassword = await bcrypt.hash(password, parseInt(process.env.HASH_SALT_ROUNDS, 10));
+      const hashedPassword = await bcrypt.hash(password, parseInt(10, 10));
 
       const userData = {
         ...req.body,

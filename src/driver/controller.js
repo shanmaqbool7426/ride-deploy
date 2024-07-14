@@ -89,7 +89,7 @@ class DriverController {
         return sendErrorResponse(res, 400, 'Invalid credentials');
       }
 
-      const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id },'myverysecuresecret');
 
       return sendSuccessResponse(res, 200, 'Login successful', { data: user, token });
     } catch (error) {
