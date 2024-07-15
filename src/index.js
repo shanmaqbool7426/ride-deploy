@@ -19,6 +19,7 @@ import feedbackRatingRoutes from './feedback-rating/route.js';
 import { connectDB } from './utils/mongoDB.js';
 import Ride from './ride/model.js'
 import Driver from './driver/model.js'
+import Wallet from './wallet/model.js'
 import Passenger from './passenger/model.js'
 import http from "http"
 import Vehicle from './vehicle/model.js';
@@ -233,24 +234,44 @@ const pickupRide = async (socket, data) => {
 
 const completeRide = async (socket, data) => {
   try {
-    console.log('pickupRide>>>>.', data);
     const ride = await Ride.findById(data?.rideId);
     if (!ride) {
-
       throw new Error('Ride not found');
     }
-    ride.status='completed'
-    const driver = await Driver.findById(ride.driver);
-    driver.wallet -= ride.onHoldBalance;
-    driver.save();
-    ride.save();
-    emitSocketEvent(ride?.passenger, 'completeRide', {status:"completeRide"});
 
+    // Complete the ride
+    ride.status = 'completed';
+    await ride.save();
+
+    // Retrieve driver's wallet
+    const driverWallet = await Wallet.findOne({ owner: ride.driver, ownerModel: 'Driver' });
+    if (!driverWallet) {
+      throw new Error('Driver wallet not found');
+    }
+
+    // Credit driver's wallet
+    const creditAmount = ride.onHoldBalance;
+    driverWallet.balance -= creditAmount;
+    console.log('pickupRide>>>>.', data);
+
+    // Add transaction to driver's wallet
+    driverWallet.transactions.push({
+      amount: creditAmount,
+      type: 'credit',
+      date: new Date(),
+      description: 'Ride completed'
+    });
+
+    await driverWallet.save();
+
+    // Emit socket event
+    emitSocketEvent(ride?.passenger, 'completeRide', { status: "completeRide" });
+
+  } catch (error) {
+    console.error('Error completing ride:', error.message);
   }
-  catch (error) {
-    console.error('Error picking up ride:', error.message);
-  }
-}
+};
+
 
 const handleAcceptRide = async (socket, { rideId, driverId }) => {
   try {

@@ -3,6 +3,7 @@ import jwt from 'jsonwebtoken';
 import Driver from './model.js';
 import { sendSuccessResponse, sendErrorResponse, HTTP_STATUS } from '../utils/responseUtils.js';
 import Passenger from '../passenger/model.js';
+import Wallet from '../wallet/model.js';
 
 const { OK, CREATED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } = HTTP_STATUS;
 
@@ -66,13 +67,27 @@ class DriverController {
   //   }
   // }
 
-
+async transectionHistory (req,res){
+    try {
+      const { ownerId } = req.params;
+      const wallet = await Wallet.findOne({ owner: ownerId });
+      if (!wallet) {
+        return res.status(404).json({ error: 'Wallet not found' });
+      }
+      return sendSuccessResponse(res, 200, 'Transections retireve successfully',wallet);
+    } catch (error) {
+      console.error('Error fetching wallet:', error.message);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  
+}
 
   async loginDriver(req, res) {
     const { email, password } = req.body;
 
     try {
       let user = await Driver.findOne({ email });
+      console.log('User found>', user)
       if (!user) {
         user = await Passenger.findOne({ email }).populate('wallet');
         console.log('User  found',user)

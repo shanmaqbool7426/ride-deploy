@@ -3,7 +3,7 @@ import mongoose  from "mongoose"
 const walletSchema = new mongoose.Schema({
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    refPath: 'ownerModel',
+    ref: 'Driver',
     required: true
   },
   ownerModel: {
