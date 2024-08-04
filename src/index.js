@@ -150,7 +150,7 @@ const handleRideRequest = async (socket, data) => {
       
       fare: data?.fare,
       status: 'requested',
-      onHoldBalance:fee
+      onHoldBalance:parseInt(fee)
     });
 
     const savedRide = await newRide.save();
