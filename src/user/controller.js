@@ -58,7 +58,7 @@ class UserController {
         return sendErrorResponse(res, BAD_REQUEST, 'Invalid credentials');
       }
 
-      const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET);
+      const token = jwt.sign({ id: user._id, role: user.role }, 'myverysecuresecret');
 
       return sendSuccessResponse(res, OK, 'Login successful', { data: user, token });
     } catch (error) {
