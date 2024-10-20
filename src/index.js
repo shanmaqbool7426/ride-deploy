@@ -23,6 +23,8 @@ import Wallet from './wallet/model.js'
 import Passenger from './passenger/model.js'
 import http from "http"
 import Vehicle from './vehicle/model.js';
+import { uploadOnCloudinary } from './utils/cloudinary.js';
+import { upload } from './middleware/multer.js';
 dotenv.config();
 
 const app = express();
@@ -81,6 +83,30 @@ app.use('/api/v1/feedback', feedbackRatingRoutes);
 app.get('/health', (req, res) => {
   res.status(200).send('OK');
 });
+
+// ... existing code ...
+
+app.use('/upload-image', upload.single('image'), async (req, res) => {
+  try {
+    const file = req.file; // This will contain the uploaded image
+    if (!file) {
+      return res.status(400).json({ message: 'No image file provided' });
+    }
+
+    const result = await uploadOnCloudinary(file.path);
+    const imageUrl = result.secure_url;
+
+    res.status(200).json({
+      message: 'Image uploaded successfully',
+      url: imageUrl,
+    });
+  } catch (error) {
+    console.error('Image upload error:', error);
+    res.status(400).json({ message: 'Image upload failed' });
+  }
+});
+
+// ... existing code ...
 // Protect routes that require authentication
 // app.use('/api/passenger/profile', passengerRoutes);
 

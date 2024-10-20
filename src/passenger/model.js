@@ -4,6 +4,9 @@ const passengerSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  type:{
+    type: String,
+  },  
   email: {
     type: String,
     required: true,

@@ -8,32 +8,73 @@ import Wallet from '../wallet/model.js';
 const { OK, CREATED, BAD_REQUEST, INTERNAL_SERVER_ERROR, NOT_FOUND } = HTTP_STATUS;
 
 class DriverController {
+
   async registerDriver(req, res) {
     try {
-      const { email, password } = req.body;
-
+      const { 
+        name, 
+        type,
+        email, 
+        password, 
+        phone,
+        location,
+        driverImage, 
+        idCardFront, 
+        idCardBack, 
+        drivingLicenseFront, 
+        drivingLicenseBack,
+        identityCardNumber
+      } = req.body;
+  
+      // Check if driver already exists
       const existingDriver = await Driver.findOne({ email });
       if (existingDriver) {
         return sendErrorResponse(res, BAD_REQUEST, 'Driver already exists');
       }
+  
 
+  
+      // Validate location
+      if (!location.type || !location.coordinates || 
+          !Array.isArray(location.coordinates) || location.coordinates.length !== 2) {
+        return sendErrorResponse(res, BAD_REQUEST, 'Invalid location format');
+      }
+  
       const hashedPassword = await bcrypt.hash(password, 10);
-
+  
       const driverData = {
-        ...req.body,
-        password: hashedPassword
+        name,
+        type,
+        email,
+        password: hashedPassword,
+        phone,
+        location: {
+          type: location.type,
+          coordinates: location.coordinates
+        },
+        driverImage,
+        idCardFront,
+        idCardBack,
+        drivingLicenseFront,
+        drivingLicenseBack,
+        identityCardNumber,
+        status: 'available', // default value
+        rating: 5.0, // default value
       };
-
+  
       const driver = new Driver(driverData);
-
       const savedDriver = await driver.save();
-
-      return sendSuccessResponse(res, CREATED, 'Driver registered successfully', savedDriver);
+  
+      // Remove sensitive information before sending response
+      const driverResponse = savedDriver.toObject();
+      delete driverResponse.password;
+  
+      return sendSuccessResponse(res, CREATED, 'Driver registered successfully', driverResponse);
     } catch (error) {
+      console.error('Error registering driver:', error);
       return sendErrorResponse(res, INTERNAL_SERVER_ERROR, 'Error registering driver', error.message);
     }
   }
-
 
   // async loginDriver(req, res) {
   //   const { email, password } = req.body;

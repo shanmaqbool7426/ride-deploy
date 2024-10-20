@@ -1,11 +1,11 @@
-import mongoose  from 'mongoose'
+import mongoose from 'mongoose'
 
 const driverSchema = new mongoose.Schema({
   name: {
     type: String,
     required: true
   },
-  type:{
+  type: {
     type: String,
     required: true,
     enum: ['driver', 'passenger'],
@@ -28,7 +28,7 @@ const driverSchema = new mongoose.Schema({
     type: {
       type: String,
       enum: ['Point'],
-      required: true
+      default: 'Point'
     },
     coordinates: {
       type: [Number],
@@ -49,17 +49,28 @@ const driverSchema = new mongoose.Schema({
     default: 'available'
   },
   wallet: {
-   type: String,
+    type: String,
   },
   driverImage: {
     type: String, // Assuming the image URL or path is stored as a string
     required: true
   },
-
-   identityCardNumber:{
+  idCardFront: {
     type: String,
-    required: true,
-   }
+    required: true
+  },
+  idCardBack: {
+    type: String,
+    required: true
+  },
+  drivingLicenseFront: {
+    type: String,
+    required: true
+  },
+  drivingLicenseBack: {
+    type: String,
+    required: true
+  }
 }, {
   timestamps: true
 });

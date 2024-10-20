@@ -8,22 +8,37 @@ cloudinary.config({
   api_secret: 'eM-jhJ0tX2nk1R97TPIpQyusB2o' 
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath, retries = 9) => {
     try {
-        if (!localFilePath) return null
-        //upload the file on cloudinary
-        console.log('localFilePath',localFilePath)
+        if (!localFilePath) return null;
+
+        console.log('localFilePath', localFilePath);
+        
+        // Attempt the upload
         const response = await cloudinary.uploader.upload(localFilePath, {
             resource_type: "auto"
-        })
-        // file has been uploaded successfull
-        //console.log("file is uploaded on cloudinary ", response.url);
+        });
+
+        console.log('>>> localFilePath', response);
+
+        // Remove the local file after a successful upload
+        fs.unlinkSync(localFilePath);
         return response;
 
     } catch (error) {
-        return null;
+        console.log('Error uploading', error);
+
+        // Retry logic
+        if (retries > 0) {
+            console.log(`Retrying upload... Attempts remaining: ${retries}`);
+            return uploadOnCloudinary(localFilePath, retries - 1);
+        } else {
+            console.log('Max retries reached. Upload failed.');
+            fs.unlinkSync(localFilePath);  // Clean up even if the retries fail
+            return null;
+        }
     }
-}
+};
 
 
 
